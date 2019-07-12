@@ -34,12 +34,24 @@ public @interface Parameter {
 
     boolean required() default false;
 
+    /**
+     * 是否不包含进去
+     * @return
+     */
     boolean excluded() default false;
 
+    /**
+     * 是否编码
+     * @return
+     */
     boolean escaped() default false;
 
     boolean attribute() default false;
 
+    /**
+     * 附加？
+     * @return
+     */
     boolean append() default false;
 
     /**

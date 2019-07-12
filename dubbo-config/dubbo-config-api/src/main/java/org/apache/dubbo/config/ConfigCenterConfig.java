@@ -40,11 +40,17 @@ import static org.apache.dubbo.configcenter.Constants.CONFIG_GROUP_KEY;
 import static org.apache.dubbo.configcenter.Constants.CONFIG_NAMESPACE_KEY;
 
 /**
- * ConfigCenterConfig
+ * ConfigCenterConfig 配置中心的配置
  */
 public class ConfigCenterConfig extends AbstractConfig {
+    /**
+     * 是否初始化
+     */
     private AtomicBoolean inited = new AtomicBoolean(false);
 
+    /**
+     * 协议地址信息
+     */
     private String protocol;
     private String address;
 
@@ -54,7 +60,9 @@ public class ConfigCenterConfig extends AbstractConfig {
     /* The namespace of the config center, generally it's used for multi-tenant,
     but it's real meaning depends on the actual Config Center you use.
     */
-
+    /**
+     * 默认的命名空间就是dubbo，可以支持多租户使用不同的配置中心
+     */
     private String namespace = CommonConstants.DUBBO;
     /* The group of the config center, generally it's used to identify an isolated space for a batch of config items,
     but it's real meaning depends on the actual Config Center you use.
@@ -64,19 +72,26 @@ public class ConfigCenterConfig extends AbstractConfig {
     private String password;
     private Long timeout = 3000L;
 
-    // If the Config Center is given the highest priority, it will override all the other configurations
+    // 如果配置中心具有最高优先级，它将覆盖所有其他配置。
     private Boolean highestPriority = true;
 
+    // 决定初始连接尝试失败时的行为，“true ”意味着一旦失败就中断整个过程。
     // Decide the behaviour when initial connection try fails, 'true' means interrupt the whole process once fail.
     private Boolean check = true;
 
     /* Used to specify the key that your properties file mapping to, most of the time you do not need to change this parameter.
     Notice that for Apollo, this parameter is meaningless, set the 'namespace' is enough.
     */
+    /**
+     * 配置中心中使用的默认的文件名的信息
+     */
     private String configFile = CommonConstants.DEFAULT_DUBBO_PROPERTIES;
 
     /* the .properties file under 'configFile' is global shared while .properties under this one is limited only to this application
     */
+    /**
+     * 应用配置中心的文件的信息
+     */
     private String appConfigFile;
 
     /* If the Config Center product you use have some special parameters that is not covered by this class, you can add it to here.
@@ -85,6 +100,9 @@ public class ConfigCenterConfig extends AbstractConfig {
            <dubbo:parameter key="config.{your key}" value="{your value}" />
       </dubbo:config-center>
      */
+    /**
+     * 配置中心的其他参数
+     */
     private Map<String, String> parameters;
 
     public ConfigCenterConfig() {
@@ -92,15 +110,25 @@ public class ConfigCenterConfig extends AbstractConfig {
 
     public URL toUrl() {
         Map<String, String> map = new HashMap<>();
+
+        //将当前类的信息，转换获取为Map信息
         appendParameters(map, this);
+
+        // 访问地址的信息
         if (StringUtils.isEmpty(address)) {
             address = ANYHOST_VALUE;
         }
+
+        // path 当前配置类的信息、
         map.put(PATH_KEY, ConfigCenterConfig.class.getSimpleName());
         // use 'zookeeper' as the default configcenter.
+
+        //默认是 zookeeper
         if (StringUtils.isEmpty(map.get(PROTOCOL_KEY))) {
             map.put(PROTOCOL_KEY, ZOOKEEPER_PROTOCOL);
         }
+
+        //构建URL 内部实现
         return UrlUtils.parseURL(address, map);
     }
 
@@ -108,6 +136,10 @@ public class ConfigCenterConfig extends AbstractConfig {
         return inited.compareAndSet(false, true);
     }
 
+    /**
+     * 更新本地缓存，跟新外部化配置信息
+     * @param externalConfiguration
+     */
     public void setExternalConfig(Map<String, String> externalConfiguration) {
         Environment.getInstance().setExternalConfigMap(externalConfiguration);
     }

@@ -46,6 +46,7 @@ import static org.apache.dubbo.common.constants.CommonConstants.DEFAULT_KEY;
 import static org.apache.dubbo.common.constants.CommonConstants.REMOVE_VALUE_PREFIX;
 
 /**
+ * 解析配置的实用方法和公共方法,针对配置类，提供了蛮多实用的方法去处理。
  * Utility methods and public methods for parsing configuration
  *
  * @export
@@ -66,46 +67,47 @@ public abstract class AbstractConfig implements Serializable {
     private static final int MAX_PATH_LENGTH = 200;
 
     /**
-     * The rule qualification for <b>name</b>
+     * The rule qualification for <b>name</b>  名称
      */
     private static final Pattern PATTERN_NAME = Pattern.compile("[\\-._0-9a-zA-Z]+");
 
     /**
-     * The rule qualification for <b>multiply name</b>
+     * The rule qualification for <b>multiply name</b>  多个名称
      */
     private static final Pattern PATTERN_MULTI_NAME = Pattern.compile("[,\\-._0-9a-zA-Z]+");
 
     /**
-     * The rule qualification for <b>method names</b>
+     * The rule qualification for <b>method names</b>  方法名称校验
      */
     private static final Pattern PATTERN_METHOD_NAME = Pattern.compile("[a-zA-Z][0-9a-zA-Z]*");
 
     /**
-     * The rule qualification for <b>path</b>
+     * The rule qualification for <b>path</b>  路径校验
      */
     private static final Pattern PATTERN_PATH = Pattern.compile("[/\\-$._0-9a-zA-Z]+");
 
     /**
-     * The pattern matches a value who has a symbol
+     * The pattern matches a value who has a symbol  值里面有标识
      */
     private static final Pattern PATTERN_NAME_HAS_SYMBOL = Pattern.compile("[:*,\\s/\\-._0-9a-zA-Z]+");
 
     /**
-     * The pattern matches a property key
+     * The pattern matches a property key  属性key
      */
     private static final Pattern PATTERN_KEY = Pattern.compile("[*,\\-._0-9a-zA-Z]+");
 
     /**
-     * The legacy properties container
+     * The legacy properties container   旧属性
      */
     private static final Map<String, String> LEGACY_PROPERTIES = new HashMap<String, String>();
 
     /**
-     * The suffix container
+     * The suffix container  后缀容器
      */
     private static final String[] SUFFIXES = new String[]{"Config", "Bean"};
 
     static {
+        // 兼容以前的陈旧的属性配置信息
         LEGACY_PROPERTIES.put("dubbo.protocol.name", "dubbo.service.protocol");
         LEGACY_PROPERTIES.put("dubbo.protocol.host", "dubbo.service.server.host");
         LEGACY_PROPERTIES.put("dubbo.protocol.port", "dubbo.service.server.port");
@@ -116,6 +118,7 @@ public abstract class AbstractConfig implements Serializable {
         LEGACY_PROPERTIES.put("dubbo.service.url", "dubbo.service.address");
 
         // this is only for compatibility
+        //为了兼容，钩子函数
         DubboShutdownHook.getDubboShutdownHook().register();
     }
 
@@ -123,6 +126,10 @@ public abstract class AbstractConfig implements Serializable {
      * The config id
      */
     protected String id;
+
+    /**
+     * 配置前缀
+     */
     protected String prefix;
 
     private static String convertLegacyValue(String key, String value) {
@@ -136,6 +143,12 @@ public abstract class AbstractConfig implements Serializable {
         return value;
     }
 
+    /**
+     * 这个就是为了根据类的名称 就是打标  比如 ConfigCenter  ->config_center
+     *
+     * @param cls
+     * @return
+     */
     private static String getTagName(Class<?> cls) {
         String tag = cls.getSimpleName();
         for (String suffix : SUFFIXES) {
@@ -151,6 +164,12 @@ public abstract class AbstractConfig implements Serializable {
         appendParameters(parameters, config, null);
     }
 
+    /**
+     * 添加方法参数到 parameters中去  这里的功能看的有点晕，大概意思就是反射读取配置
+     * @param parameters
+     * @param config
+     * @param prefix  前缀
+     */
     @SuppressWarnings("unchecked")
     protected static void appendParameters(Map<String, String> parameters, Object config, String prefix) {
         if (config == null) {
@@ -162,6 +181,8 @@ public abstract class AbstractConfig implements Serializable {
                 String name = method.getName();
                 if (MethodUtils.isGetter(method)) {
                     Parameter parameter = method.getAnnotation(Parameter.class);
+
+                    //排查掉不包含的参数  返回值Object的参数
                     if (method.getReturnType() == Object.class || parameter != null && parameter.excluded()) {
                         continue;
                     }
@@ -172,6 +193,8 @@ public abstract class AbstractConfig implements Serializable {
                         key = calculatePropertyFromGetter(name);
                     }
                     Object value = method.invoke(config);
+
+                    //获取值的信息
                     String str = String.valueOf(value).trim();
                     if (value != null && str.length() > 0) {
                         if (parameter != null && parameter.escaped()) {
@@ -198,6 +221,7 @@ public abstract class AbstractConfig implements Serializable {
                         && Modifier.isPublic(method.getModifiers())
                         && method.getParameterTypes().length == 0
                         && method.getReturnType() == Map.class) {
+                    //获取多个配置项
                     Map<String, String> map = (Map<String, String>) method.invoke(config, new Object[0]);
                     if (map != null && map.size() > 0) {
                         String pre = (prefix != null && prefix.length() > 0 ? prefix + "." : "");
@@ -477,8 +501,8 @@ public abstract class AbstractConfig implements Serializable {
     }
 
     /**
-     * Should be called after Config was fully initialized.
-     * // FIXME: this method should be completely replaced by appendParameters
+     * Should be called after Config was fully initialized. 应在配置完全初始化后调用
+     * // FIXME: this method should be completely replaced by appendParameters  此方法应完全替换为AppendParameters
      *
      * @return
      * @see AbstractConfig#appendParameters(Map, Object, String)
@@ -532,6 +556,10 @@ public abstract class AbstractConfig implements Serializable {
         return metaData;
     }
 
+    /**
+     * 获取配置的前缀，使用TagName dubbo.config_center   ConfigCenterConfig
+     * @return
+     */
     @Parameter(excluded = true)
     public String getPrefix() {
         return StringUtils.isNotEmpty(prefix) ? prefix : (CommonConstants.DUBBO + "." + getTagName(this.getClass()));
@@ -621,6 +649,11 @@ public abstract class AbstractConfig implements Serializable {
         return true;
     }
 
+    /**
+     * 是否为元数据方法
+     * @param method
+     * @return
+     */
     private boolean isMetaMethod(Method method) {
         String name = method.getName();
         if (!(name.startsWith("get") || name.startsWith("is"))) {
