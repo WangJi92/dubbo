@@ -35,7 +35,7 @@ import org.springframework.context.event.ContextClosedEvent;
 import java.util.Set;
 
 /**
- * SpringExtensionFactory
+ * SpringExtensionFactory spring扩展工厂的信息
  */
 public class SpringExtensionFactory implements ExtensionFactory {
     private static final Logger logger = LoggerFactory.getLogger(SpringExtensionFactory.class);
@@ -46,6 +46,7 @@ public class SpringExtensionFactory implements ExtensionFactory {
     public static void addApplicationContext(ApplicationContext context) {
         CONTEXTS.add(context);
         if (context instanceof ConfigurableApplicationContext) {
+            // 注册一个JVM 钩子函数去处理关闭信息
             ((ConfigurableApplicationContext) context).registerShutdownHook();
             DubboShutdownHook.getDubboShutdownHook().unregister();
         }
@@ -73,7 +74,9 @@ public class SpringExtensionFactory implements ExtensionFactory {
         if (type.isInterface() && type.isAnnotationPresent(SPI.class)) {
             return null;
         }
-
+        /**
+         * 从spring中获取Bean的信息
+         */
         for (ApplicationContext context : CONTEXTS) {
             if (context.containsBean(name)) {
                 Object bean = context.getBean(name);
@@ -89,6 +92,7 @@ public class SpringExtensionFactory implements ExtensionFactory {
             return null;
         }
 
+        // 这里没有进行类型的教育
         for (ApplicationContext context : CONTEXTS) {
             try {
                 return context.getBean(type);
@@ -106,6 +110,9 @@ public class SpringExtensionFactory implements ExtensionFactory {
         return null;
     }
 
+    /**
+     * 改变为通过事件进行钩子函数监听，将注册到注册中心的信息删除掉
+     */
     private static class ShutdownHookListener implements ApplicationListener {
         @Override
         public void onApplicationEvent(ApplicationEvent event) {

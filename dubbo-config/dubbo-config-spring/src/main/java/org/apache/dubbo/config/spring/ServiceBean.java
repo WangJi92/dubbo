@@ -53,6 +53,7 @@ import static org.apache.dubbo.common.constants.CommonConstants.COMMA_SPLIT_PATT
 import static org.apache.dubbo.config.spring.util.BeanFactoryUtils.addApplicationListener;
 
 /**
+ * 服务Bean工厂，用来导出服务，有服务的配置、启动、销毁、spring的启动监听、名称设置、
  * ServiceFactoryBean
  *
  * @export
@@ -70,6 +71,9 @@ public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean
 
     private transient String beanName;
 
+    /**
+     * 是否支持事件机制，不支持在afterPropertiesSet 最后就要进行导出Bean的信息啦
+     */
     private transient boolean supportedApplicationListener;
 
     private ApplicationEventPublisher applicationEventPublisher;
@@ -87,7 +91,11 @@ public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
+
+        //注册spring工厂扩展
         SpringExtensionFactory.addApplicationContext(applicationContext);
+
+        //添加spring事件的监听
         supportedApplicationListener = addApplicationListener(applicationContext, this);
     }
 
@@ -115,6 +123,10 @@ public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean
         }
     }
 
+    /**
+     * 为啥这里写的这么恶心啊~
+     * @throws Exception
+     */
     @Override
     @SuppressWarnings({"unchecked", "deprecation"})
     public void afterPropertiesSet() throws Exception {

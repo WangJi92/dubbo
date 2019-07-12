@@ -45,6 +45,12 @@ import static org.springframework.util.ObjectUtils.isEmpty;
  */
 public class BeanFactoryUtils {
 
+    /**
+     * 为了兼容添加的监听器的信息
+     * @param applicationContext
+     * @param listener
+     * @return
+     */
     public static boolean addApplicationListener(ApplicationContext applicationContext, ApplicationListener listener) {
         try {
             // backward compatibility to spring 2.0.1
