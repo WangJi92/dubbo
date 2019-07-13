@@ -38,9 +38,15 @@ import static org.apache.dubbo.common.constants.CommonConstants.COMMA_SPLIT_PATT
 import static org.apache.dubbo.common.constants.CommonConstants.DEFAULT_KEY;
 import static org.apache.dubbo.common.constants.CommonConstants.REMOVE_VALUE_PREFIX;
 
+/**
+ * 用来方便加载配置资源的信息的
+ */
 public class ConfigUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigUtils.class);
+    /**
+     * ${xxx} 这种类型的变量
+     */
     private static Pattern VARIABLE_PATTERN = Pattern.compile(
             "\\$\\s*\\{?\\s*([\\._0-9a-zA-Z]+)\\s*\\}?");
     private static volatile Properties PROPERTIES;
@@ -123,12 +129,19 @@ public class ConfigUtils {
         return names;
     }
 
+    /**
+     * 类似替换变量的信息
+     * @param expression
+     * @param params
+     * @return
+     */
     public static String replaceProperty(String expression, Map<String, String> params) {
         if (expression == null || expression.length() == 0 || expression.indexOf('$') < 0) {
             return expression;
         }
         Matcher matcher = VARIABLE_PATTERN.matcher(expression);
         StringBuffer sb = new StringBuffer();
+        // 这个模式匹配蛮高级的
         while (matcher.find()) {
             String key = matcher.group(1);
             String value = System.getProperty(key);
@@ -148,10 +161,13 @@ public class ConfigUtils {
         if (PROPERTIES == null) {
             synchronized (ConfigUtils.class) {
                 if (PROPERTIES == null) {
+                    // Java System.getProperty 和 System.getenv 区别 https://blog.csdn.net/neweastsun/article/details/81590821
                     String path = System.getProperty(CommonConstants.DUBBO_PROPERTIES_KEY);
                     if (path == null || path.length() == 0) {
+                        // 这里两次读取系统变量进行补偿，害怕读取不到
                         path = System.getenv(CommonConstants.DUBBO_PROPERTIES_KEY);
                         if (path == null || path.length() == 0) {
+                            // 还是读取不到使用默认的配置信息
                             path = CommonConstants.DEFAULT_DUBBO_PROPERTIES;
                         }
                     }
@@ -172,6 +188,12 @@ public class ConfigUtils {
         }
     }
 
+    /**
+     * 1、首先获取JVM -D 系统属性
+     * 2、在获取Dubbo 本地配置
+     * @param key
+     * @return
+     */
     public static String getProperty(String key) {
         return getProperty(key, null);
     }
@@ -209,6 +231,7 @@ public class ConfigUtils {
     }
 
     /**
+     * 从classPath 加载配置属性信息
      * Load properties file to {@link Properties} from class path.
      *
      * @param fileName       properties file name. for example: <code>dubbo.properties</code>, <code>METE-INF/conf/foo.properties</code>
@@ -223,6 +246,7 @@ public class ConfigUtils {
     public static Properties loadProperties(String fileName, boolean allowMultiFile, boolean optional) {
         Properties properties = new Properties();
         // add scene judgement in windows environment Fix 2557
+        // 检测文件是否存在
         if (checkFileNameExist(fileName)) {
             try {
                 FileInputStream input = new FileInputStream(fileName);
@@ -239,6 +263,7 @@ public class ConfigUtils {
 
         List<java.net.URL> list = new ArrayList<java.net.URL>();
         try {
+            // classpaths 下面查询是否加载多个文件信息
             Enumeration<java.net.URL> urls = ClassUtils.getClassLoader().getResources(fileName);
             list = new ArrayList<java.net.URL>();
             while (urls.hasMoreElements()) {
@@ -263,7 +288,7 @@ public class ConfigUtils {
                 // throw new IllegalStateException(errMsg); // see http://code.alibabatech.com/jira/browse/DUBBO-133
             }
 
-            // fall back to use method getResourceAsStream
+            // fall back to use method getResourceAsStream  使用这个来加载流的信息，对于Class路径下的
             try {
                 properties.load(ClassUtils.getClassLoader().getResourceAsStream(fileName));
             } catch (Throwable e) {
@@ -276,6 +301,7 @@ public class ConfigUtils {
 
         for (java.net.URL url : list) {
             try {
+                // 多个使用同一资源定位符架子多个资源
                 Properties p = new Properties();
                 InputStream input = url.openStream();
                 if (input != null) {
