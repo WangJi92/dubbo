@@ -309,6 +309,10 @@ public class ConfigUtils {
     }
 
 
+    /**
+     * 获取到MxBean的 PID的值的信息
+     * @return
+     */
     public static int getPid() {
         if (PID < 0) {
             try {

@@ -420,6 +420,13 @@ public abstract class AbstractConfig implements Serializable {
         }).collect(Collectors.toSet());
     }
 
+    /**
+     * 读取 外部化配置的的key
+     * @param clazz
+     * @param setter
+     * @return
+     * @throws Exception
+     */
     private static String extractPropertyName(Class<?> clazz, Method setter) throws Exception {
         String propertyName = setter.getName().substring("set".length());
         Method getter = null;
@@ -575,6 +582,7 @@ public abstract class AbstractConfig implements Serializable {
      */
     public void refresh() {
         try {
+            // 这里构造读取配置的顺序，根据顺序读取
             CompositeConfiguration compositeConfiguration = Environment.getInstance().getConfiguration(getPrefix(), getId());
             InmemoryConfiguration config = new InmemoryConfiguration(getPrefix(), getId());
             config.addProperties(getMetaData());
@@ -586,11 +594,13 @@ public abstract class AbstractConfig implements Serializable {
                 compositeConfiguration.addConfiguration(2, config);
             }
 
+            //循环方法，获取重写值并将新值设置回方法 意思就是从配置信息中读取到当前的实例中去
             // loop methods, get override value and set the new value back to method
             Method[] methods = getClass().getMethods();
             for (Method method : methods) {
                 if (MethodUtils.isSetter(method)) {
                     try {
+                        // 从本地缓存中读取全局的配置的信息
                         String value = StringUtils.trim(compositeConfiguration.getString(extractPropertyName(getClass(), method)));
                         // isTypeMatch() is called to avoid duplicate and incorrect update, for example, we have two 'setGeneric' methods in ReferenceConfig.
                         if (StringUtils.isNotEmpty(value) && ClassUtils.isTypeMatch(method.getParameterTypes()[0], value)) {

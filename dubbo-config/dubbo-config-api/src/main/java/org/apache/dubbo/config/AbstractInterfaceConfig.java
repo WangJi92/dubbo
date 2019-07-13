@@ -43,6 +43,8 @@ import org.apache.dubbo.rpc.cluster.Cluster;
 import org.apache.dubbo.rpc.model.ApplicationModel;
 import org.apache.dubbo.rpc.support.MockInvoker;
 
+import com.sun.org.apache.bcel.internal.generic.IINC;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -190,6 +192,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
     protected String tag;
 
     /**
+     * 检测注册中心
      * Check whether the registry config is exists, and then conversion it to {@link RegistryConfig}
      */
     protected void checkRegistry() {
@@ -204,6 +207,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
             }
         }
 
+        // 兼容目的注册到本地配置中心
         useRegistryForConfigIfNecessary();
     }
 
@@ -255,11 +259,17 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
         );
     }
 
+    /**
+     * 检查元数 中心配置
+     */
     protected void checkMetadataReport() {
         // TODO get from ConfigManager first, only create if absent.
+        // 不存在首先创建
         if (metadataReportConfig == null) {
             setMetadataReportConfig(new MetadataReportConfig());
         }
+
+        // 刷新自我配置
         metadataReportConfig.refresh();
         if (!metadataReportConfig.isValid()) {
             logger.warn("There's no valid metadata config found, if you are using the simplified mode of registry url, " +
@@ -278,14 +288,21 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
             this.configCenter.refresh();
             prepareEnvironment();
         }
+
+        // 这里环境的刷新
         ConfigManager.getInstance().refreshAll();
     }
 
+    /**
+     * 准备环境 重配置中心读取 全局和应用的配置信息
+     */
     private void prepareEnvironment() {
         if (configCenter.isValid()) {
             if (!configCenter.checkOrUpdateInited()) {
                 return;
             }
+
+            //动态获取配置中心的信息
             DynamicConfiguration dynamicConfiguration = getDynamicConfiguration(configCenter.toUrl());
             String configContent = dynamicConfiguration.getProperties(configCenter.getConfigFile(), configCenter.getGroup());
 
@@ -338,9 +355,13 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                     appendParameters(map, config);
                     map.put(PATH_KEY, RegistryService.class.getName());
                     appendRuntimeParameters(map);
+
+                    //没有协议 填充默认的dubbo
                     if (!map.containsKey(PROTOCOL_KEY)) {
                         map.put(PROTOCOL_KEY, DUBBO_PROTOCOL);
                     }
+
+                    //组装URL参数
                     List<URL> urls = UrlUtils.parseURLs(address, map);
 
                     for (URL url : urls) {
@@ -406,6 +427,10 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
         return null;
     }
 
+    /**
+     * 添加一些参数 当前的版本
+     * @param map
+     */
     static void appendRuntimeParameters(Map<String, String> map) {
         map.put(DUBBO_VERSION_KEY, Version.getProtocolVersion());
         map.put(RELEASE_KEY, Version.getVersion());
@@ -434,6 +459,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
     }
 
     /**
+     * 检查远程服务接口和方法是否符合Dobbo的要求，主要检查配置文件中配置的方法包含在远程服务的接口中
      * Check whether the remote service interface and the methods meet with Dubbo's requirements.it mainly check, if the
      * methods configured in the configuration file are included in the interface of remote service
      *
@@ -543,7 +569,11 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
         }
     }
 
+    /**
+     * 将注册表ID转换为注册表  意思就是将远程的配置读取打牌转换为本地的配置
+     */
     private void convertRegistryIdsToRegistries() {
+        // 为啥这里要两个都为才去检索远程的配置呢？因为本地的优先级最高  http://dubbo.apache.org/zh-cn/docs/user/configuration/configuration-load-process.html
         if (StringUtils.isEmpty(registryIds) && CollectionUtils.isEmpty(registries)) {
             Set<String> configedRegistries = new HashSet<>();
             configedRegistries.addAll(getSubProperties(Environment.getInstance().getExternalConfigurationMap(),
@@ -590,8 +620,11 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
 
     }
 
+    /**
+     * 系统设置是否设置了
+     */
     private void loadRegistriesFromBackwardConfig() {
-        // for backward compatibility
+        // for backward compatibility  为了向后兼容
         // -Ddubbo.registry.address is now deprecated.
         if (registries == null || registries.isEmpty()) {
             String address = ConfigUtils.getProperty("dubbo.registry.address");
@@ -610,6 +643,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
     }
 
     /**
+     * 出于兼容性的目的，如果注册表协议是ZooKeeper和没有显式指定配置中心。
      * For compatibility purpose, use registry as the default config center if the registry protocol is zookeeper and
      * there's no config center specified explicitly.
      */

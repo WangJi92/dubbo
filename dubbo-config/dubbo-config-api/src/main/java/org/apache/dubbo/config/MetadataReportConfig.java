@@ -25,7 +25,7 @@ import static org.apache.dubbo.common.constants.CommonConstants.DUBBO;
 import static org.apache.dubbo.common.constants.CommonConstants.PROPERTIES_CHAR_SEPERATOR;
 
 /**
- * MetadataReportConfig
+ * MetadataReportConfig  元数据中心 元数据是什么？元数据定义为描述数据的数据，在服务治理中，例如服务接口名，重试次数，版本号等等都可以理解为元数据。在 2.7 之前，元数据一股脑丢在了注册中心之中，
  *
  * @export
  */
@@ -51,7 +51,7 @@ public class MetadataReportConfig extends AbstractConfig {
     private Integer timeout;
 
     /**
-     * The group the metadata in . It is the same as registry
+     * The group the metadata in . It is the same as registry  元数据所在的组，与注册中心类似
      */
     private String group;
 
@@ -63,16 +63,18 @@ public class MetadataReportConfig extends AbstractConfig {
     private Integer retryPeriod;
     /**
      * By default the metadatastore will store full metadata repeatly every day .
+     * 默认情况下，元数据存储将每天重复存储完整的元数据
      */
     private Boolean cycleReport;
 
     /**
      * Sync report, default async
+     * 同步报告，默认异步
      */
     private Boolean syncReport;
 
     /**
-     * cluster
+     * cluster 集群
      */
     private Boolean cluster;
 

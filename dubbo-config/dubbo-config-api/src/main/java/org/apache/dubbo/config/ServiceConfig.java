@@ -185,6 +185,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
     private transient volatile boolean exported;
 
     /**
+     * 标志服务是否有未过期的，如果调用了未过期的方法，则该值为true
      * The flag whether a service has unexported ,if the method unexported is invoked, the value is true
      */
     private transient volatile boolean unexported;
@@ -289,10 +290,13 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         return unexported;
     }
 
+    /**
+     * 准备环境信息、读取通用配置、读取配置中心配置信息
+     */
     public void checkAndUpdateSubConfigs() {
-        // Use default configs defined explicitly on global configs
+        //使用在全局配置上显式定义的默认配置
         completeCompoundConfigs();
-        // Config Center should always being started first.
+        // Config Center should always being started first. 获取配置中心
         startConfigCenter();
         checkDefault();
         checkProtocol();
@@ -301,6 +305,8 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         if (!isOnlyInJvm()) {
             checkRegistry();
         }
+
+        //刷新一下自己的配置项
         this.refresh();
         checkMetadataReport();
 
@@ -308,6 +314,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
             throw new IllegalStateException("<dubbo:service interface=\"\" /> interface not allow null!");
         }
 
+        //是否为泛化接口
         if (ref instanceof GenericService) {
             interfaceClass = GenericService.class;
             if (StringUtils.isEmpty(generic)) {
@@ -338,12 +345,15 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                 throw new IllegalStateException("The local implementation class " + localClass.getName() + " not implement interface " + interfaceName);
             }
         }
+
+        // dubbo的本地存根（Stub） https://www.cnblogs.com/hzhuxin/p/8250602.html
         if (stub != null) {
             if ("true".equals(stub)) {
                 stub = interfaceName + "Stub";
             }
             Class<?> stubClass;
             try {
+                //查找装的实现类的信息
                 stubClass = ClassUtils.forNameWithThreadContextClassLoader(stub);
             } catch (ClassNotFoundException e) {
                 throw new IllegalStateException(e.getMessage(), e);
@@ -353,11 +363,13 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
             }
         }
         checkStubAndLocal(interfaceClass);
+
+        // dubbo的Mock功能与源码实现  https://www.jianshu.com/p/ce8de35986cf
         checkMock(interfaceClass);
     }
 
     /**
-     * Determine if it is injvm
+     * Determine if it is injvm  是否只是本地进行发布？
      *
      * @return
      */
@@ -409,12 +421,18 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         }
         exported = true;
 
+        // 路径信息就是当前的接口的名称
         if (StringUtils.isEmpty(path)) {
             path = interfaceName;
         }
+
+        //导出服务的信息
         doExportUrls();
     }
 
+    /**
+     * 检测接口的实现类是否为空
+     */
     private void checkRef() {
         // reference should not be null, and is the implementation of the given interface
         if (ref == null) {
@@ -447,6 +465,9 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         unexported = true;
     }
 
+    /**
+     * 导出服务，这里有的麻烦了
+     */
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void doExportUrls() {
         List<URL> registryURLs = loadRegistries(true);
@@ -850,13 +871,18 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                 ConfigManager.getInstance()
                         .getDefaultProvider()
                         .orElseGet(() -> {
+                            // 构建一个提供者配置的信息
                             ProviderConfig providerConfig = new ProviderConfig();
+                            // 从配置中读取到配置
                             providerConfig.refresh();
                             return providerConfig;
                         })
         );
     }
 
+    /**
+     * 检测协议设置
+     */
     private void checkProtocol() {
         if (CollectionUtils.isEmpty(protocols) && provider != null) {
             setProtocols(provider.getProtocols());
@@ -864,6 +890,13 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         convertProtocolIdsToProtocols();
     }
 
+    /**
+     * http://dubbo.apache.org/zh-cn/docs/user/configuration/annotation.html
+     * dubbo.protocols.dubbo.name=dubbo
+     * dubbo.protocols.dubbo.port=20880
+     * dubbo.protocols.hessian.name=hessian
+     * dubbo.protocols.hessian.port=8089
+     */
     private void convertProtocolIdsToProtocols() {
         if (StringUtils.isEmpty(protocolIds) && CollectionUtils.isEmpty(protocols)) {
             List<String> configedProtocols = new ArrayList<>();
@@ -872,9 +905,11 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
             configedProtocols.addAll(getSubProperties(Environment.getInstance()
                     .getAppExternalConfigurationMap(), PROTOCOLS_SUFFIX));
 
+            // 外部化去读取支持的协议的信息 dubbo  hessian的配置
             protocolIds = String.join(",", configedProtocols);
         }
 
+        // 没有设置就设置默认的协议
         if (StringUtils.isEmpty(protocolIds)) {
             if (CollectionUtils.isEmpty(protocols)) {
                 setProtocols(
