@@ -26,22 +26,48 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * TODO load as SPI will be better?
+ * 将Dubbo中的环境信息进行封装
  */
 public class Environment {
     private static final Environment INSTANCE = new Environment();
-
+    /**
+     * 属性变量 System.getProperty --> dubbo.properties
+     */
     private Map<String, PropertiesConfiguration> propertiesConfigs = new ConcurrentHashMap<>();
+    /**
+     * 系统变量 操作系统层面  System.getenv
+     */
     private Map<String, SystemConfiguration> systemConfigs = new ConcurrentHashMap<>();
+
+    /**
+     * 环境变量 System.getProperty
+     */
     private Map<String, EnvironmentConfiguration> environmentConfigs = new ConcurrentHashMap<>();
+    /**
+     * 从外部读取的，通常为配置中心获取的信息 （内存性的配置） 全局的
+     */
     private Map<String, InmemoryConfiguration> externalConfigs = new ConcurrentHashMap<>();
+    /**
+     * 从外部读取的，通常为配置中心获取的信息 （内存性的配置） 应用的配置
+     */
     private Map<String, InmemoryConfiguration> appExternalConfigs = new ConcurrentHashMap<>();
 
+    /**
+     * 外部化配置的Map读取的信息
+     */
     private Map<String, String> externalConfigurationMap = new HashMap<>();
+    /**
+     * 读取外部化配置额信息
+     */
     private Map<String, String> appExternalConfigurationMap = new HashMap<>();
 
+    /**
+     * 配置中心的优先级是否高？
+     */
     private boolean configCenterFirst = true;
 
     /**
+     * 此实例始终是一种动态配置类型，configcenterconfig将在启动时加载该实例并将其分配给此处。 动态配置 比如从zookeeper中获取的属性
      * FIXME, this instance will always be a type of DynamicConfiguration, ConfigCenterConfig will load the instance at startup and assign it to here.
      */
     private Configuration dynamicConfiguration;
@@ -103,6 +129,8 @@ public class Environment {
     }
 
     /**
+     * 每个调用创建一个新的实例，因为它只在启动时调用，我认为潜在的成本不会很大。否则，如果使用缓存，我们应该确保每个配置都有一个唯一的ID，
+     * 这是很难保证的，因为它在用户方面，特别是在serviceconfig和referenceconfig方面
      * Create new instance for each call, since it will be called only at startup, I think there's no big deal of the potential cost.
      * Otherwise, if use cache, we should make sure each Config has a unique id which is difficult to guarantee because is on the user's side,
      * especially when it comes to ServiceConfig and ReferenceConfig.
@@ -113,7 +141,7 @@ public class Environment {
      */
     public CompositeConfiguration getConfiguration(String prefix, String id) {
         CompositeConfiguration compositeConfiguration = new CompositeConfiguration();
-        // Config center has the highest priority
+        // Config center has the highest priority  这里的优先级根据顺序哦
         compositeConfiguration.addConfiguration(this.getSystemConfig(prefix, id));
         compositeConfiguration.addConfiguration(this.getEnvironmentConfig(prefix, id));
         compositeConfiguration.addConfiguration(this.getAppExternalConfig(prefix, id));
@@ -153,6 +181,10 @@ public class Environment {
         this.configCenterFirst = configCenterFirst;
     }
 
+    /**
+     * 喜欢使用Java8 的啦啊~~
+     * @return
+     */
     public Optional<Configuration> getDynamicConfiguration() {
         return Optional.ofNullable(dynamicConfiguration);
     }

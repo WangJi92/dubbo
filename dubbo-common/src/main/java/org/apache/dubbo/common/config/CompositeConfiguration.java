@@ -24,13 +24,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- *
+ * 组合多个配置属性，根据先后的顺序进行获取信息（单独使用感觉蛮危险）
  */
 public class CompositeConfiguration implements Configuration {
     private Logger logger = LoggerFactory.getLogger(CompositeConfiguration.class);
 
     /**
-     * List holding all the configuration
+     * List holding all the configuration，组合多个属性
      */
     private List<Configuration> configList = new LinkedList<Configuration>();
 
@@ -40,6 +40,7 @@ public class CompositeConfiguration implements Configuration {
 
     public CompositeConfiguration(Configuration... configurations) {
         if (configurations != null && configurations.length > 0) {
+            //这里感觉有点意思，不存在的时候才去添加哦
             Arrays.stream(configurations).filter(config -> !configList.contains(config)).forEach(configList::add);
         }
     }
@@ -61,6 +62,7 @@ public class CompositeConfiguration implements Configuration {
 
     @Override
     public Object getInternalProperty(String key) {
+        // 根据顺序进行遍历，从而实现了优先级的处理哦！
         Configuration firstMatchingConfiguration = null;
         for (Configuration config : configList) {
             try {

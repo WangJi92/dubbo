@@ -19,6 +19,9 @@ package org.apache.dubbo.common.config;
 import org.apache.dubbo.common.utils.StringUtils;
 
 /**
+ * 来自系统环境的配置  https://blog.csdn.net/neweastsun/article/details/81590821
+ *
+ * 属性仅在java平台中有效，而环境变量是全局的，属于操作系统级——运行在同一台机器上的所有应用都有效。
  * Configuration from system environment
  */
 public class EnvironmentConfiguration extends AbstractPrefixConfiguration {

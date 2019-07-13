@@ -18,9 +18,12 @@ package org.apache.dubbo.common.config;
 
 
 /**
+ * 这真的有必要吗？属性配置应该已经涵盖了这一点：
  * FIXME: is this really necessary? PropertiesConfiguration should have already covered this:
  * @see PropertiesConfiguration
  * @See ConfigUtils#getProperty(String)
+ *
+ * 属性仅在java平台中有效，而环境变量是全局的，属于操作系统级——运行在同一台机器上的所有应用都有效。
  */
 public class SystemConfiguration extends AbstractPrefixConfiguration {
 

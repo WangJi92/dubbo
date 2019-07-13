@@ -34,8 +34,14 @@ public interface CommonConstants {
 
     String DISABLED_KEY = "disabled";
 
+    /**
+     * dubbo.properties 文件在哪里？JVM 属性
+     */
     String DUBBO_PROPERTIES_KEY = "dubbo.properties.file";
 
+    /**
+     * 默认的路径的信息
+     */
     String DEFAULT_DUBBO_PROPERTIES = "dubbo.properties";
 
     String ANY_VALUE = "*";

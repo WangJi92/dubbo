@@ -21,6 +21,7 @@ import org.apache.dubbo.common.logger.LoggerFactory;
 import org.apache.dubbo.common.utils.ConfigUtils;
 
 /**
+ * 读取系统配置，或者是本地的dubbo.properties 文件的信息
  * Configuration from system properties and dubbo.properties
  */
 public class PropertiesConfiguration extends AbstractPrefixConfiguration {
@@ -36,6 +37,10 @@ public class PropertiesConfiguration extends AbstractPrefixConfiguration {
 
     @Override
     public Object getInternalProperty(String key) {
+        /**
+         * 1、先读取JVM系统变量
+         * 2、在读取本地配置
+         */
         return ConfigUtils.getProperty(key);
     }
 }

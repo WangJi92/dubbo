@@ -20,11 +20,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
+ * 内存配置信息，很简单很轻松哦
  * In-memory configuration
  */
 public class InmemoryConfiguration extends AbstractPrefixConfiguration {
 
     // stores the configuration key-value pairs
+    // 存储配置键值对
     private Map<String, String> store = new LinkedHashMap<>();
 
     public InmemoryConfiguration(String prefix, String id) {

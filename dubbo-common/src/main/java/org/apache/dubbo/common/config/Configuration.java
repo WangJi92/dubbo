@@ -17,10 +17,12 @@
 package org.apache.dubbo.common.config;
 
 /**
+ * 配置接口，以获取指定键的值,配置中心获取数据，本地系统配置！这个是dubbo 内部实现配置缓存的基础信息
  * Configuration interface, to fetch the value for the specified key.
  */
 public interface Configuration {
     /**
+     * 获取指定key的值的信息
      * Get a string associated with the given configuration key.
      *
      * @param key The configuration key.
@@ -31,6 +33,7 @@ public interface Configuration {
     }
 
     /**
+     * 获取指定key的信息，不存在返回默认值
      * Get a string associated with the given configuration key.
      * If the key doesn't map to an existing object, the default value
      * is returned.
@@ -45,6 +48,7 @@ public interface Configuration {
     }
 
     /**
+     * 获取熟悉的值的信息，和 getString  感觉没有什么区别
      * Gets a property from the configuration. This is the most basic get
      * method for retrieving values of properties. In a typical implementation
      * of the {@code Configuration} interface the other get methods (that
@@ -78,6 +82,11 @@ public interface Configuration {
         return value != null ? value : defaultValue;
     }
 
+    /**
+     * 真正实现获取配置的信息
+     * @param key
+     * @return
+     */
     Object getInternalProperty(String key);
 
     /**

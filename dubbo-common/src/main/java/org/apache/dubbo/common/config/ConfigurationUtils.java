@@ -31,6 +31,7 @@ import static org.apache.dubbo.common.constants.CommonConstants.SHUTDOWN_WAIT_KE
 import static org.apache.dubbo.common.constants.CommonConstants.SHUTDOWN_WAIT_SECONDS_KEY;
 
 /**
+ * 方便从多个资源中根据优先级获取属性的信息
  * Utilities for manipulating configurations from different sources
  */
 public class ConfigurationUtils {
@@ -66,10 +67,22 @@ public class ConfigurationUtils {
         return getProperty(property, null);
     }
 
+    /**
+     * 封装了优先级的，从属性中获取信息
+     * @param property
+     * @param defaultValue
+     * @return
+     */
     public static String getProperty(String property, String defaultValue) {
         return StringUtils.trim(Environment.getInstance().getConfiguration().getString(property, defaultValue));
     }
 
+    /**
+     * 把一段文字转换为属性，Map
+     * @param content
+     * @return
+     * @throws IOException
+     */
     public static Map<String, String> parseProperties(String content) throws IOException {
         Map<String, String> map = new HashMap<>();
         if (StringUtils.isEmpty(content)) {
