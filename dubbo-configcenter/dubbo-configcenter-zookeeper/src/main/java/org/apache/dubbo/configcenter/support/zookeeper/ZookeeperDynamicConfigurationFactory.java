@@ -22,10 +22,13 @@ import org.apache.dubbo.configcenter.DynamicConfiguration;
 import org.apache.dubbo.remoting.zookeeper.ZookeeperTransporter;
 
 /**
- *
+ * 动态配置中心  http://dubbo.apache.org/zh-cn/docs/user/configuration/config-center.html
  */
 public class ZookeeperDynamicConfigurationFactory extends AbstractDynamicConfigurationFactory {
 
+    /**
+     * Zookeeper 也是动态生成的扩展
+     */
     private ZookeeperTransporter zookeeperTransporter;
 
     public void setZookeeperTransporter(ZookeeperTransporter zookeeperTransporter) {

@@ -21,7 +21,7 @@ import org.apache.dubbo.configcenter.AbstractDynamicConfigurationFactory;
 import org.apache.dubbo.configcenter.DynamicConfiguration;
 
 /**
- *
+ * 默认动态配置中心的实现哦
  */
 public class NopDynamicConfigurationFactory extends AbstractDynamicConfigurationFactory {
 

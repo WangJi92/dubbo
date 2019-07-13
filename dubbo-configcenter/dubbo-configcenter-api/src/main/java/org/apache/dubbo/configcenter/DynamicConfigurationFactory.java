@@ -20,11 +20,16 @@ import org.apache.dubbo.common.URL;
 import org.apache.dubbo.common.extension.SPI;
 
 /**
- *
+ * 默认是什么都没有实现的
  */
 @SPI("nop")
 public interface DynamicConfigurationFactory {
 
+    /**
+     * 根据SPI动态获取配置中心
+     * @param url
+     * @return
+     */
     DynamicConfiguration getDynamicConfiguration(URL url);
 
 }

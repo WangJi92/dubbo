@@ -18,7 +18,13 @@ package org.apache.dubbo.configcenter;
 
 public interface Constants {
     String CONFIG_CLUSTER_KEY = "config.cluster";
+    /**
+     * 命名空间默认为 dubbo
+     */
     String CONFIG_NAMESPACE_KEY = "config.namespace";
+    /**
+     * 分组默认为 dubbo
+     */
     String CONFIG_GROUP_KEY = "config.group";
     String CONFIG_CHECK_KEY = "config.check";
 }

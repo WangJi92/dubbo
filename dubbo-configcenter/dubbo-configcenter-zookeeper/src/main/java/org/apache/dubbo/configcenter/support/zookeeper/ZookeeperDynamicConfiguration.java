@@ -56,9 +56,13 @@ public class ZookeeperDynamicConfiguration implements DynamicConfiguration {
 
         initializedLatch = new CountDownLatch(1);
         this.cacheListener = new CacheListener(rootPath, initializedLatch);
+
+        //守护进程哦，没有业务线程自动关闭哦，小细节
         this.executor = Executors.newFixedThreadPool(1, new NamedThreadFactory(this.getClass().getSimpleName(), true));
 
         zkClient = zookeeperTransporter.connect(url);
+
+        // 监听这个路径下面的所有的哦~ 包含应用层面 和 全局配置面
         zkClient.addDataListener(rootPath, cacheListener, executor);
         try {
             // Wait for connection

@@ -22,6 +22,7 @@ package org.apache.dubbo.configcenter;
 public interface ConfigurationListener {
 
     /**
+     * 配置中心信息改变后的监听
      * Listener call back method. Listener gets notified by this method once there's any change happens on the config
      * the listener listens on.
      *

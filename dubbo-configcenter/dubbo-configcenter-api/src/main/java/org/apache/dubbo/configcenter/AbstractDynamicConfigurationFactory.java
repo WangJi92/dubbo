@@ -19,7 +19,7 @@ package org.apache.dubbo.configcenter;
 import org.apache.dubbo.common.URL;
 
 /**
- *
+ * 实现了一个单例的配置中心的实例哦
  */
 public abstract class AbstractDynamicConfigurationFactory implements DynamicConfigurationFactory {
 

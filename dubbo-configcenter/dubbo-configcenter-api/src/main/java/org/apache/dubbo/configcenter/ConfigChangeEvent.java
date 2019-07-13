@@ -17,14 +17,24 @@
 package org.apache.dubbo.configcenter;
 
 /**
+ * 配置项改变
  * Config change event, immutable.
  *
  * @see ConfigChangeType
  */
 public class ConfigChangeEvent {
+    /**
+     * key
+     */
     private final String key;
-
+    /**
+     * 值
+     */
     private final String value;
+
+    /**
+     * 改变类型
+     */
     private final ConfigChangeType changeType;
 
     public ConfigChangeEvent(String key, String value) {

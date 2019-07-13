@@ -25,13 +25,16 @@ import java.util.Optional;
 import static org.apache.dubbo.common.extension.ExtensionLoader.getExtensionLoader;
 
 /**
+ * 动态配置信息
  * Dynamic Configuration
  * <br/>
+ * 从框架内部的使用场景来看，主要有三种方法
  * From the use scenario internally in framework, there're mainly three kinds of methods:
  * <ul>
- *     <li>1. getConfig, get governance rules or single config item from Config Center.</li>
- *     <li>2. getConfigFile, get configuration file from Config Center at start up.</li>
+ *     <li>1. getConfig, get governance rules or single config item from Config Center.</li> get config，从配置中心获取治理规则或单个配置项
+ *     <li>2. getConfigFile, get configuration file from Config Center at start up.</li> get config file，启动时从配置中心获取配置文件
  *     <li>3. addListener/removeListener, add or remove listeners for governance rules or config items that need to watch.</li>
+ *     addlistener/removelistener，添加或删除需要监视的治理规则或配置项的侦听器
  * </ul>
  */
 public interface DynamicConfiguration extends Configuration {
@@ -65,7 +68,7 @@ public interface DynamicConfiguration extends Configuration {
      * trigger a notification that contains the current value.
      *
      * @param key      the key to represent a configuration
-     * @param group    the group where the key belongs to
+     * @param group    the group where the key belongs to  一般使用默认分组Group
      * @param listener configuration listener
      */
     void addListener(String key, String group, ConfigurationListener listener);
@@ -80,7 +83,7 @@ public interface DynamicConfiguration extends Configuration {
     void removeListener(String key, String group, ConfigurationListener listener);
 
     /**
-     * Get the governance rule mapped to the given key and the given group
+     * Get the governance rule mapped to the given key and the given group  获取映射到给定键和给定组的治理规则
      *
      * @param key   the key to represent a configuration
      * @param group the group where the key belongs to
@@ -103,6 +106,7 @@ public interface DynamicConfiguration extends Configuration {
     String getRule(String key, String group, long timeout) throws IllegalStateException;
 
     /**
+     * 获取配置中心配置文件的信息的值
      * This method are mostly used to get a compound config file, such as a complete dubbo.properties file.
      * Also {@see #getConfig(String, String)}
      */
@@ -117,6 +121,7 @@ public interface DynamicConfiguration extends Configuration {
     String getProperties(String key, String group, long timeout) throws IllegalStateException;
 
     /**
+     * 通过SPI 获取动态配置中心的实例
      * Find DynamicConfiguration instance
      *
      * @return DynamicConfiguration instance
@@ -129,6 +134,7 @@ public interface DynamicConfiguration extends Configuration {
     }
 
      /**
+      * 根据接口、版本、分组获取治理规则~
      * The format is '{interfaceName}:[version]:[group]'
      *
      * @return
