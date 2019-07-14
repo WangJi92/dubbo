@@ -29,7 +29,7 @@ import org.apache.dubbo.common.logger.LoggerFactory;
 import org.apache.dubbo.common.utils.StringUtils;
 
 /**
- * Code generator for Adaptive class
+ * Code generator for Adaptive class  生成默认的Adaptive 方法
  */
 public class AdaptiveClassCodeGenerator {
     
@@ -63,9 +63,15 @@ public class AdaptiveClassCodeGenerator {
     
     
     private static final String CODE_EXTENSION_ASSIGNMENT = "%s extension = (%<s)%s.getExtensionLoader(%s.class).getExtension(extName);\n";
-    
+
+    /**
+     * 需要生成的扩展类的名称
+     */
     private final Class<?> type;
-    
+
+    /**
+     * 默认扩展类的名称
+     */
     private String defaultExtName;
     
     public AdaptiveClassCodeGenerator(Class<?> type, String defaultExtName) {
@@ -84,6 +90,7 @@ public class AdaptiveClassCodeGenerator {
      * generate and return class code
      */
     public String generate() {
+        // 必须要在方法上有Adaptive注解哦~~
         // no need to generate adaptive class since there's no adaptive method found.
         if (!hasAdaptiveMethod()) {
             throw new IllegalStateException("No adaptive method exist on extension " + type.getName() + ", refuse to create the adaptive class!");

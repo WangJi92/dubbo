@@ -21,7 +21,7 @@ import org.apache.dubbo.common.extension.ExtensionLoader;
 import org.apache.dubbo.common.extension.SPI;
 
 /**
- * SpiExtensionFactory
+ * SpiExtensionFactory  处理相关的依赖
  */
 public class SpiExtensionFactory implements ExtensionFactory {
 
@@ -29,6 +29,8 @@ public class SpiExtensionFactory implements ExtensionFactory {
     public <T> T getExtension(Class<T> type, String name) {
         if (type.isInterface() && type.isAnnotationPresent(SPI.class)) {
             ExtensionLoader<T> loader = ExtensionLoader.getExtensionLoader(type);
+
+            //依赖注入必须实现 接口方法必须实现 Adaptive
             if (!loader.getSupportedExtensions().isEmpty()) {
                 return loader.getAdaptiveExtension();
             }

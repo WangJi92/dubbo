@@ -23,6 +23,7 @@ package org.apache.dubbo.common.extension;
 public interface ExtensionFactory {
 
     /**
+     * 获取扩展实例工厂方法，比如SPi 或者Spring 等等
      * Get extension.
      *
      * @param type object type.

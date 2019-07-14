@@ -25,6 +25,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * https://www.jianshu.com/p/dc616814ce98 可以动态的根据参数进行调整，默认生成的是根据URL中的参数进行动态调整的！
  * Provide helpful information for {@link ExtensionLoader} to inject dependency extension instance.
  *
  * @see ExtensionLoader

@@ -25,7 +25,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * AdaptiveExtensionFactory
+ * AdaptiveExtensionFactory  依赖注入工厂
  */
 @Adaptive
 public class AdaptiveExtensionFactory implements ExtensionFactory {
@@ -43,6 +43,7 @@ public class AdaptiveExtensionFactory implements ExtensionFactory {
 
     @Override
     public <T> T getExtension(Class<T> type, String name) {
+        // 依赖注入 根据第一匹配原则去查找，如果SPI中有 使用 SpiExtensionFactory，如果Spring 容器中有 使用Spring 容器中的！
         for (ExtensionFactory factory : factories) {
             T extension = factory.getExtension(type, name);
             if (extension != null) {
