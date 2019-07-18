@@ -24,6 +24,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+/**
+ * 比较的简单的继承了SPI信息的处理
+ */
 public class SimpleDataStore implements DataStore {
 
     // <component name or id, <data-name, data-value>>

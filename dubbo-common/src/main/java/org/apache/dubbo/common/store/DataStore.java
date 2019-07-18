@@ -21,6 +21,9 @@ import org.apache.dubbo.common.extension.SPI;
 
 import java.util.Map;
 
+/**
+ * 感觉就是一个简单的二次Map的封装
+ */
 @SPI("simple")
 public interface DataStore {
 
